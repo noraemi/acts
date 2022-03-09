@@ -30,6 +30,10 @@ ProcessCode PropagationAlgorithm::execute(
                                                 m_cfg.ptRange.second);
   std::uniform_real_distribution<double> qDist(0., 1.);
 
+  std::cout << "phi range: " << m_cfg.phiRange.first << " - " << m_cfg.phiRange.second << std::endl;
+  std::cout << "eta range: " << m_cfg.etaRange.first << " - " << m_cfg.etaRange.second << std::endl;
+  std::cout << "pt range: " << m_cfg.ptRange.first << " - " << m_cfg.ptRange.second << std::endl;
+
   std::shared_ptr<const Acts::PerigeeSurface> surface =
       Acts::Surface::makeShared<Acts::PerigeeSurface>(
           Acts::Vector3(0., 0., 0.));
@@ -40,7 +44,9 @@ ProcessCode PropagationAlgorithm::execute(
 
   // Output (optional): the recorded material
   std::unordered_map<size_t, Acts::RecordedMaterialTrack> recordedMaterial;
-
+  
+  std::cout << "d0, z0, t sigma: " << m_cfg.d0Sigma << ", " << m_cfg.z0Sigma << ", " << m_cfg.tSigma << std::endl;
+  std::cout << "ntest: " << m_cfg.ntests << std::endl;
   // loop over number of particles
   for (size_t it = 0; it < m_cfg.ntests; ++it) {
     /// get the d0 and z0
@@ -64,7 +70,7 @@ ProcessCode PropagationAlgorithm::execute(
 
     // The covariance generation
     auto cov = generateCovariance(rng, gauss);
-
+    std::cout << "propagatorImpl: " << m_cfg.propagatorImpl << std::endl;
     // execute the test for charged particles
     PropagationOutput pOutput;
     if (charge) {
@@ -73,6 +79,10 @@ ProcessCode PropagationAlgorithm::execute(
                                                  std::move(cov));
       sPosition = startParameters.position(context.geoContext);
       sMomentum = startParameters.momentum();
+
+      std::cout << "sPosition: " << sPosition << std::endl;
+      std::cout << "sMomentum: " << sMomentum << std::endl;
+      std::cout << "startParameters: " << startParameters << std::endl;
       pOutput = m_cfg.propagatorImpl->execute(
           context, m_cfg, Acts::LoggerWrapper{logger()}, startParameters);
     } else {
@@ -81,6 +91,7 @@ ProcessCode PropagationAlgorithm::execute(
           surface, std::move(pars), std::move(cov));
       sPosition = neutralParameters.position(context.geoContext);
       sMomentum = neutralParameters.momentum();
+      std::cout << "neutralParameters: " << neutralParameters << std::endl;
       pOutput = m_cfg.propagatorImpl->execute(
           context, m_cfg, Acts::LoggerWrapper{logger()}, neutralParameters);
     }
@@ -117,8 +128,10 @@ ProcessCode PropagationAlgorithm::execute(
 std::optional<Acts::BoundSymMatrix> PropagationAlgorithm::generateCovariance(
     ActsExamples::RandomEngine& rnd,
     std::normal_distribution<double>& gauss) const {
+      std::cout << "covTransport: " << m_cfg.covarianceTransport << std::endl;
   if (m_cfg.covarianceTransport) {
     // We start from the correlation matrix
+    std::cout << "correlation: " << m_cfg.correlations << std::endl;
     Acts::BoundSymMatrix newCov(m_cfg.correlations);
     // Then we draw errors according to the error values
     Acts::BoundVector covs_smeared = m_cfg.covariances;

@@ -95,7 +95,7 @@ auto Acts::Propagator<S, N>::propagate(
         typename propagator_options_t::action_list_type>> {
   static_assert(Concepts::BoundTrackParametersConcept<parameters_t>,
                 "Parameters do not fulfill bound parameters concept.");
-
+  std::cout << "propagte start, option" << std::endl;
   // Type of track parameters produced by the propagation
   using ReturnParameterType = CurvilinearTrackParameters;
 
@@ -168,7 +168,7 @@ auto Acts::Propagator<S, N>::propagate(
         typename propagator_options_t::action_list_type>> {
   static_assert(Concepts::BoundTrackParametersConcept<parameters_t>,
                 "Parameters do not fulfill bound parameters concept.");
-
+  std::cout << "propagte start, target, option" << std::endl;
   // Type of track parameters produced at the end of the propagation
   using return_parameter_type = BoundTrackParameters;
 

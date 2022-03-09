@@ -99,6 +99,7 @@ bool Acts::CylinderBounds::inside3D(const Vector3& position,
   if ((s_onSurfaceTolerance + addToleranceR) <=
       std::abs(perp(position) - get(eR))) {
     return false;
+
   } else if (checkAbsolute && m_closed) {
     double bevelMinZ = get(eBevelMinZ);
     double bevelMaxZ = get(eBevelMaxZ);
@@ -150,6 +151,10 @@ std::vector<Acts::Vector3> Acts::CylinderBounds::createCircles(
 
   // Write the two bows/circles on either side
   std::vector<int> sides = {-1, 1};
+
+  double bevelMinZ = get(eBevelMinZ);
+  double bevelMaxZ = get(eBevelMaxZ);
+
   for (auto& side : sides) {
     for (size_t iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
       int addon = (iseg == phiSegs.size() - 2 and not fullCylinder) ? 1 : 0;
@@ -160,14 +165,17 @@ std::vector<Acts::Vector3> Acts::CylinderBounds::createCircles(
     }
   }
 
-  double bevelMinZ = get(eBevelMinZ);
-  double bevelMaxZ = get(eBevelMaxZ);
+
 
   // Modify the vertices position if bevel is defined
   if ((bevelMinZ != 0. || bevelMaxZ != 0.) && vertices.size() % 2 == 0) {
     auto halfWay = vertices.end() - vertices.size() / 2;
     double mult{1};
-    auto func = [&mult](Vector3& v) { v(2) += v(1) * mult; };
+    auto func = [&mult, &ctrans](Vector3& v) {
+      v = ctrans.inverse() * v; 
+      v(2) += v(1) * mult;
+      v = ctrans * v;
+    };
     if (bevelMinZ != 0.) {
       mult = std::tan(-bevelMinZ);
       std::for_each(vertices.begin(), halfWay, func);

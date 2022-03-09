@@ -10,7 +10,7 @@
 
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsExamples/Propagation/PropagationAlgorithm.hpp"
-
+#include "Acts/Propagator/MuonNavigator.hpp"
 namespace ActsExamples {
 
 ///@brief Propagator wrapper
@@ -100,9 +100,9 @@ class ConcretePropagator : public PropagatorInterface {
       using MaterialInteractor = Acts::MaterialInteractor;
       using SteppingLogger = Acts::detail::SteppingLogger;
       using EndOfWorld = Acts::EndOfWorldReached;
-
+      using MuonNavigator = Acts::MuonNavigator;
       // Action list and abort list
-      using ActionList = Acts::ActionList<SteppingLogger, MaterialInteractor>;
+      using ActionList = Acts::ActionList<SteppingLogger, MaterialInteractor, MuonNavigator>;
       using AbortList = Acts::AbortList<EndOfWorld>;
       using PropagatorOptions =
           Acts::DenseStepperPropagatorOptions<ActionList, AbortList>;
@@ -110,15 +110,18 @@ class ConcretePropagator : public PropagatorInterface {
       PropagatorOptions options(context.geoContext, context.magFieldContext,
                                 Acts::LoggerWrapper{logger()});
       options.pathLimit = pathLength;
-
+      std::cout << "pathLimit: " << options.pathLimit << std::endl;
       // Activate loop protection at some pt value
       options.loopProtection =
           (startParameters.transverseMomentum() < cfg.ptLoopers);
-
+      std::cout << "ptLoopers: " << cfg.ptLoopers << std::endl;
       // Switch the material interaction on/off & eventually into logging mode
       auto& mInteractor = options.actionList.get<MaterialInteractor>();
+      std::cout << "multipleScattering: " << cfg.multipleScattering << std::endl;
       mInteractor.multipleScattering = cfg.multipleScattering;
+      std::cout << "energyLost: " << cfg.energyLoss << std::endl;
       mInteractor.energyLoss = cfg.energyLoss;
+      std::cout << "recordInteractions: " << cfg.recordMaterialInteractions << std::endl;
       mInteractor.recordInteractions = cfg.recordMaterialInteractions;
 
       // Switch the logger to sterile, e.g. for timing checks
@@ -126,7 +129,7 @@ class ConcretePropagator : public PropagatorInterface {
       sLogger.sterile = cfg.sterileLogger;
       // Set a maximum step size
       options.maxStepSize = cfg.maxStepSize;
-
+      std::cout << "maxStepSize: " << cfg.maxStepSize << std::endl;
       // Propagate using the propagator
       auto result = m_propagator.propagate(startParameters, options);
       if (result.ok()) {
