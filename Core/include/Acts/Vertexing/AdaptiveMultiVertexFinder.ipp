@@ -55,12 +55,12 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
     Vertex<InputTrack_t>& vtxCandidate = *allVertices.back();
     allVerticesPtr.push_back(&vtxCandidate);
 
-    ACTS_DEBUG("Position of current vertex candidate after seeding: "
-               << vtxCandidate.fullPosition());
+    std::cout << "CARROT Position of current vertex candidate after seeding: "
+               << vtxCandidate.fullPosition() << "\n";
     if (vtxCandidate.position().z() ==
         vertexingOptions.vertexConstraint.position().z()) {
-      ACTS_DEBUG(
-          "No seed found anymore. Break and stop primary vertex finding.");
+      std::cout << "CARROT 
+          "No seed found anymore. Break and stop primary vertex finding.\n";
       allVertices.pop_back();
       allVerticesPtr.pop_back();
       break;
@@ -78,7 +78,7 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
       return prepResult.error();
     }
     if (!(*prepResult)) {
-      ACTS_DEBUG("Could not prepare for fit anymore. Break.");
+      std::cout << "CARROT Could not prepare for fit anymore. Break.\n";
       allVertices.pop_back();
       allVerticesPtr.pop_back();
       break;
@@ -92,13 +92,13 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
     if (!fitResult.ok()) {
       return fitResult.error();
     }
-    ACTS_DEBUG("New position of current vertex candidate after fit: "
-               << vtxCandidate.fullPosition());
+    std::cout << "CARROT New position of current vertex candidate after fit: "
+               << vtxCandidate.fullPosition() << "\n";
     // Check if vertex is good vertex
     auto [nCompatibleTracks, isGoodVertex] =
         checkVertexAndCompatibleTracks(vtxCandidate, seedTracks, fitterState);
 
-    ACTS_DEBUG("Vertex is good vertex: " << isGoodVertex);
+    std::cout << "CARROT Vertex is good vertex: " << isGoodVertex << "\n";
     if (nCompatibleTracks > 0) {
       removeCompatibleTracksFromSeedTracks(vtxCandidate, seedTracks,
                                            fitterState, removedSeedTracks);
@@ -107,8 +107,8 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
           vtxCandidate, seedTracks, fitterState, removedSeedTracks,
           vertexingOptions.geoContext);
       if (!removedIncompatibleTrack) {
-        ACTS_DEBUG(
-            "Could not remove any further track from seed tracks. Break.");
+        std::cout << 
+            "CARROT Could not remove any further track from seed tracks. Break.\n";
         allVertices.pop_back();
         allVerticesPtr.pop_back();
         break;
@@ -116,7 +116,7 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
     }
     bool keepVertex = isGoodVertex &&
                       keepNewVertex(vtxCandidate, allVerticesPtr, fitterState);
-    ACTS_DEBUG("New vertex will be saved: " << keepVertex);
+    std::cout << "CARROT New vertex will be saved: " << keepVertex << "\n";
 
     // Delete vertex from allVertices list again if it's not kept
     if (not keepVertex) {
@@ -153,6 +153,7 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::doSeeding(
       m_cfg.seedFinder.find(trackVector, seedOptions, seedFinderState);
 
   if (!seedResult.ok()) {
+	std::cout << "CARROT seeding result not ok\n"; 
     return seedResult.error();
   }
 
